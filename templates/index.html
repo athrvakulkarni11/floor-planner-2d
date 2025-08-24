@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blueprint Generator - AI Architect</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #667eea 100%);
+            min-height: 100vh;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 25px;
+            padding: 20px 0;
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            font-weight: 700;
+            background: linear-gradient(45deg, #fff, #e3f2fd);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            font-size: 1.3rem;
+            opacity: 0.95;
+            font-weight: 300;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 25px;
+            height: calc(100vh - 180px);
+        }
+
+        .controls-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow-y: auto;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .controls-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .controls-panel::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .controls-panel::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 10px;
+        }
+
+        .visualization-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(255,255,255,0.2);
+            overflow: hidden;
+        }
+
+        .form-section {
+            margin-bottom: 25px;
+        }
+
+        .form-section h3 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: white;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .checkbox-item:hover {
+            background: #e2e8f0;
+            transform: translateY(-1px);
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+
+        .checkbox-item label {
+            margin: 0;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 12px;
+            font-family: inherit;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #5a6268 0%, #343a40 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(108, 117, 125, 0.4);
+        }
+
+        .btn:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .floor-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            padding: 20px 25px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 15px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .floor-nav {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .floor-btn {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+        }
+
+        .floor-btn:hover,
+        .floor-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .floor-info {
+            font-weight: 700;
+            color: #2d3748;
+            font-size: 18px;
+        }
+
+        .blueprint-container {
+            flex: 1;
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .blueprint-canvas {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: auto;
+            padding: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform-origin: center center;
+        }
+
+        .blueprint-canvas::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .blueprint-canvas::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .blueprint-canvas::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 4px;
+        }
+
+        .blueprint-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.1;
+            background-image: 
+                linear-gradient(to right, #666 1px, transparent 1px),
+                linear-gradient(to bottom, #666 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .room {
+            position: absolute;
+            border: 3px solid #2d3748;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 
+                0 4px 15px rgba(0,0,0,0.1),
+                inset 0 1px 0 rgba(255,255,255,0.6);
+            backdrop-filter: blur(10px);
+            min-width: 80px;
+            min-height: 60px;
+            z-index: 1;
+            transform-origin: center center;
+        }
+
+        .room:hover {
+            transform: scale(1.05) translateY(-5px);
+            box-shadow: 
+                0 15px 35px rgba(0,0,0,0.2),
+                0 5px 15px rgba(0,0,0,0.1),
+                inset 0 1px 0 rgba(255,255,255,0.8);
+            z-index: 100;
+            border-color: #667eea;
+        }
+
+        .room-content {
+            padding: 8px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .room-name {
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: #2d3748;
+        }
+
+        .room-direction {
+            font-size: 10px;
+            opacity: 0.8;
+            background: rgba(255,255,255,0.9);
+            padding: 3px 8px;
+            border-radius: 12px;
+            margin: 3px 0;
+            border: 1px solid rgba(0,0,0,0.1);
+            backdrop-filter: blur(5px);
+        }
+
+        .room-area {
+            font-size: 10px;
+            opacity: 0.7;
+            font-weight: 500;
+        }
+
+        .room-features {
+            font-size: 9px;
+            opacity: 0.6;
+            margin-top: 2px;
+            max-width: 100px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .loading {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            font-size: 18px;
+            color: #718096;
+            text-align: center;
+        }
+
+        .loading-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.7;
+        }
+
+        .error {
+            color: #e53e3e;
+            background: linear-gradient(135deg, #fed7d7 0%, #feb2b2 100%);
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin: 15px 0;
+            border: 1px solid #fc8181;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(229, 62, 62, 0.15);
+        }
+
+        .success {
+            color: #38a169;
+            background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%);
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin: 15px 0;
+            border: 1px solid #68d391;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(56, 161, 105, 0.15);
+        }
+
+        .blueprint-info {
+            margin-top: 20px;
+            padding: 25px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 15px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .blueprint-info h4 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            font-size: 14px;
+        }
+
+        .info-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .info-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .info-item strong {
+            color: #4a5568;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .optimization-goals {
+            margin-bottom: 20px;
+        }
+
+        .goal-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .goal-tag {
+            background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 100%);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            border: 2px solid transparent;
+        }
+
+        .goal-tag:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .goal-tag.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #4c51bf;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .version-info {
+            font-size: 12px;
+            color: #718096;
+            margin-top: 15px;
+            text-align: center;
+            padding: 10px;
+            background: #f7fafc;
+            border-radius: 8px;
+        }
+
+        .room-tooltip {
+            position: absolute;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            max-width: 250px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .zoom-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .zoom-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: rgba(255,255,255,0.9);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #4a5568;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .zoom-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        @media (max-width: 1400px) {
+            .main-content {
+                grid-template-columns: 350px 1fr;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 320px 1fr;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr;
+                height: auto;
+            }
+            
+            .controls-panel {
+                max-height: 400px;
+            }
+            
+            .visualization-panel {
+                height: 70vh;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .checkbox-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .floor-controls {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .main-content {
+                gap: 15px;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header fade-in">
+            <h1>🏗️ AI Blueprint Generator</h1>
+            <p>Design your perfect building with AI-powered architecture</p>
+        </div>
+
+        <div class="main-content">
+            <div class="controls-panel fade-in">
+                <div class="form-section">
+                    <h3>🏢 Building Requirements</h3>
+                    
+                    <div class="form-group">
+                        <label for="buildingType">Building Type</label>
+                        <select id="buildingType">
+                            <option value="">Select building type...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="totalArea">Total Area (sq m)</label>
+                        <input type="number" id="totalArea" placeholder="e.g., 150" min="50" max="10000">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="floors">Number of Floors</label>
+                        <input type="number" id="floors" placeholder="e.g., 2" min="1" max="10">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="occupancy">Occupancy Type</label>
+                        <select id="occupancy">
+                            <option value="family">Family</option>
+                            <option value="commercial">Commercial</option>
+                            <option value="office">Office</option>
+                            <option value="retail">Retail</option>
+                            <option value="institutional">Institutional</option>
+                            <option value="industrial">Industrial</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Special Features</label>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="parking" value="parking">
+                                <label for="parking">🚗 Parking</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="garden" value="garden">
+                                <label for="garden">🌿 Garden</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="balcony" value="balcony">
+                                <label for="balcony">🏡 Balcony</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="basement" value="basement">
+                                <label for="basement">🏠 Basement</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="elevator" value="elevator">
+                                <label for="elevator">🛗 Elevator</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="terrace" value="terrace">
+                                <label for="terrace">🌅 Terrace</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="budgetLevel">Budget Level</label>
+                        <select id="budgetLevel">
+                            <option value="basic">💰 Basic</option>
+                            <option value="standard" selected>💰💰 Standard</option>
+                            <option value="premium">💰💰💰 Premium</option>
+                            <option value="luxury">💰💰💰💰 Luxury</option>
+                        </select>
+                    </div>
+
+                    <button class="btn btn-primary pulse" id="generateBtn" onclick="generateBlueprint()">
+                        🎯 Generate Blueprint
+                    </button>
+                </div>
+
+                <div class="form-section" id="feedbackSection" style="display: none;">
+                    <h3>💬 Design Feedback</h3>
+                    <div class="form-group">
+                        <label for="feedback">What would you like to change?</label>
+                        <textarea id="feedback" placeholder="Describe what you'd like to change about the design..."></textarea>
+                        <button class="btn btn-secondary" onclick="submitFeedback()">📝 Update Design</button>
+                    </div>
+                </div>
+
+                <div class="form-section" id="optimizationSection" style="display: none;">
+                    <h3>⚡ Optimization Goals</h3>
+                    <div class="optimization-goals">
+                        <label>Select optimization goals:</label>
+                        <div class="goal-tags">
+                            <div class="goal-tag" onclick="toggleGoal(this)" data-goal="energy_efficiency">🔋 Energy Efficiency</div>
+                            <div class="goal-tag" onclick="toggleGoal(this)" data-goal="space_optimization">📐 Space Optimization</div>
+                            <div class="goal-tag" onclick="toggleGoal(this)" data-goal="natural_light">☀️ Natural Light</div>
+                            <div class="goal-tag" onclick="toggleGoal(this)" data-goal="accessibility">♿ Accessibility</div>
+                            <div class="goal-tag" onclick="toggleGoal(this)" data-goal="cost_reduction">💵 Cost Reduction</div>
+                            <div class="goal-tag" onclick="toggleGoal(this)" data-goal="privacy">🔒 Privacy</div>
+                        </div>
+                        <button class="btn btn-secondary" onclick="optimizeDesign()" style="margin-top: 15px;">⚡ Optimize Design</button>
+                    </div>
+                </div>
+
+                <div id="message"></div>
+                <div class="version-info" id="versionInfo"></div>
+            </div>
+
+            <div class="visualization-panel fade-in">
+                <div class="floor-controls" id="floorControls" style="display: none;">
+                    <div class="floor-info">
+                        <span id="currentFloorInfo">Floor 1</span>
+                    </div>
+                    <div class="floor-nav" id="floorNavigation">
+                        <!-- Floor buttons will be dynamically generated -->
+                    </div>
+                </div>
+
+                <div class="blueprint-container">
+                    <div class="zoom-controls">
+                        <button class="zoom-btn" onclick="zoomIn()" title="Zoom In">+</button>
+                        <button class="zoom-btn" onclick="zoomOut()" title="Zoom Out">−</button>
+                        <button class="zoom-btn" onclick="resetZoom()" title="Reset Zoom">⌂</button>
+                    </div>
+                    
+                    <div class="blueprint-canvas" id="blueprintCanvas">
+                        <div class="blueprint-grid"></div>
+                        <div class="loading">
+                            <div class="loading-icon">🏠</div>
+                            <div>Generate a blueprint to see your design come to life!</div>
+                            <div style="font-size: 14px; opacity: 0.7; margin-top: 10px;">Choose your building type and requirements to get started</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="blueprint-info" id="blueprintInfo" style="display: none;">
+                    <h4>📊 Building Information</h4>
+                    <div class="info-grid" id="infoGrid">
+                        <!-- Building info will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="room-tooltip" id="roomTooltip"></div>
+
+    <script>
+        let currentSessionId = null;
+        let currentBlueprint = null;
+        let currentFloor = 1;
+        let zoomLevel = 1;
+        let selectedGoals = [];
+
+        async function generateBlueprint() {
+            const buildingType = document.getElementById('buildingType').value;
+            const totalArea = parseFloat(document.getElementById('totalArea').value);
+            const floors = parseInt(document.getElementById('floors').value);
+            const occupancy = document.getElementById('occupancy').value;
+            const budgetLevel = document.getElementById('budgetLevel').value;
+
+            // Get selected special features
+            const specialFeatures = Array.from(document.querySelectorAll('.checkbox-item input[type="checkbox"]:checked'))
+                .map(cb => cb.value);
+
+            if (!buildingType || !totalArea || !floors) {
+                showMessage('Please fill in all required fields', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        building_type: buildingType,
+                        total_area: totalArea,
+                        floors: floors,
+                        occupancy: occupancy,
+                        special_features: specialFeatures,
+                        budget_level: budgetLevel
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    currentSessionId = data.session_id;
+                    currentBlueprint = data.blueprint;
+                    showBlueprint(data.blueprint);
+                    showMessage('Blueprint generated successfully!', 'success');
+                    document.getElementById('feedbackSection').style.display = 'block';
+                    document.getElementById('optimizationSection').style.display = 'block';
+                } else {
+                    showMessage('Failed to generate blueprint: ' + data.message, 'error');
+                }
+            } catch (error) {
+                showMessage('Error generating blueprint: ' + error.message, 'error');
+            }
+        }
+
+        function showBlueprint(blueprint) {
+            const canvas = document.getElementById('blueprintCanvas');
+            canvas.innerHTML = '<div class="blueprint-grid"></div>';
+
+            const floorControls = document.getElementById('floorControls');
+            floorControls.style.display = 'flex';
+
+            // Generate floor navigation
+            const floorNav = document.getElementById('floorNavigation');
+            floorNav.innerHTML = '';
+            for (let i = 1; i <= blueprint.building_info.floors; i++) {
+                const btn = document.createElement('button');
+                btn.className = `floor-btn ${i === currentFloor ? 'active' : ''}`;
+                btn.textContent = `Floor ${i}`;
+                btn.onclick = () => switchFloor(i);
+                floorNav.appendChild(btn);
+            }
+
+            // Show current floor
+            showFloorPlan(blueprint.floor_plans.find(fp => fp.floor_number === currentFloor));
+
+            // Update building info
+            showBuildingInfo(blueprint);
+        }
+
+        function showFloorPlan(floorPlan) {
+            if (!floorPlan) return;
+
+            const canvas = document.getElementById('blueprintCanvas');
+            floorPlan.rooms.forEach(room => {
+                const roomElement = createRoomElement(room);
+                canvas.appendChild(roomElement);
+            });
+        }
+
+        function createRoomElement(room) {
+            const roomDiv = document.createElement('div');
+            roomDiv.className = 'room';
+            roomDiv.style.backgroundColor = room.color || '#f0f0f0';
+            roomDiv.style.width = `${room.dimensions.width * 20}px`;
+            roomDiv.style.height = `${room.dimensions.length * 20}px`;
+            roomDiv.style.left = `${room.position.x * 20 + 300}px`;
+            roomDiv.style.top = `${room.position.y * 20 + 200}px`;
+
+            const content = document.createElement('div');
+            content.className = 'room-content';
+            content.innerHTML = `
+                <div class="room-name">${room.name}</div>
+                <div class="room-direction">${room.direction}</div>
+                <div class="room-area">${room.dimensions.area}m²</div>
+                ${room.features.length ? `<div class="room-features">${room.features.join(', ')}</div>` : ''}
+            `;
+            roomDiv.appendChild(content);
+
+            // Add tooltip functionality
+            roomDiv.addEventListener('mouseover', () => showRoomTooltip(room, roomDiv));
+            roomDiv.addEventListener('mouseout', hideRoomTooltip);
+
+            return roomDiv;
+        }
+
+        function showRoomTooltip(room, element) {
+            const tooltip = document.getElementById('roomTooltip');
+            tooltip.innerHTML = `
+                <strong>${room.name}</strong><br>
+                Type: ${room.type}<br>
+                Area: ${room.dimensions.area}m²<br>
+                Direction: ${room.direction}<br>
+                Features: ${room.features.join(', ') || 'None'}
+            `;
+            tooltip.style.opacity = '1';
+            
+            const rect = element.getBoundingClientRect();
+            tooltip.style.left = `${rect.right + 10}px`;
+            tooltip.style.top = `${rect.top}px`;
+        }
+
+        function hideRoomTooltip() {
+            const tooltip = document.getElementById('roomTooltip');
+            tooltip.style.opacity = '0';
+        }
+
+        function showBuildingInfo(blueprint) {
+            const infoSection = document.getElementById('blueprintInfo');
+            infoSection.style.display = 'block';
+
+            const infoGrid = document.getElementById('infoGrid');
+            infoGrid.innerHTML = `
+                <div class="info-item">
+                    <strong>Building Type</strong>
+                    ${blueprint.building_info.type.replace(/_/g, ' ')}
+                </div>
+                <div class="info-item">
+                    <strong>Total Area</strong>
+                    ${blueprint.building_info.total_area}m²
+                </div>
+                <div class="info-item">
+                    <strong>Floors</strong>
+                    ${blueprint.building_info.floors}
+                </div>
+                <div class="info-item">
+                    <strong>Occupancy</strong>
+                    ${blueprint.building_info.occupancy}
+                </div>
+            `;
+        }
+
+        async function switchFloor(floorNumber) {
+            if (!currentSessionId) return;
+
+            try {
+                const response = await fetch('/api/update-floor', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        session_id: currentSessionId,
+                        floor_number: floorNumber
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    currentFloor = floorNumber;
+                    showBlueprint(data.blueprint);
+                    document.getElementById('currentFloorInfo').textContent = `Floor ${floorNumber}`;
+                }
+            } catch (error) {
+                showMessage('Error switching floors: ' + error.message, 'error');
+            }
+        }
+
+        async function submitFeedback() {
+            const feedback = document.getElementById('feedback').value;
+            if (!feedback || !currentSessionId) return;
+
+            try {
+                const response = await fetch('/api/iterate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        session_id: currentSessionId,
+                        feedback: feedback
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    currentBlueprint = data.blueprint;
+                    showBlueprint(data.blueprint);
+                    showMessage('Blueprint updated successfully!', 'success');
+                    document.getElementById('feedback').value = '';
+                }
+            } catch (error) {
+                showMessage('Error updating blueprint: ' + error.message, 'error');
+            }
+        }
+
+        function toggleGoal(element) {
+            element.classList.toggle('selected');
+            const goal = element.dataset.goal;
+            if (element.classList.contains('selected')) {
+                selectedGoals.push(goal);
+            } else {
+                selectedGoals = selectedGoals.filter(g => g !== goal);
+            }
+        }
+
+        async function optimizeDesign() {
+            if (!currentSessionId || selectedGoals.length === 0) return;
+
+            try {
+                const response = await fetch(`/api/optimize?session_id=${currentSessionId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        goals: selectedGoals
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    currentBlueprint = data.blueprint;
+                    showBlueprint(data.blueprint);
+                    showMessage('Blueprint optimized successfully!', 'success');
+                }
+            } catch (error) {
+                showMessage('Error optimizing blueprint: ' + error.message, 'error');
+            }
+        }
+
+        function showMessage(message, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.className = type;
+            messageDiv.textContent = message;
+            setTimeout(() => {
+                messageDiv.textContent = '';
+                messageDiv.className = '';
+            }, 5000);
+        }
+
+        function zoomIn() {
+            zoomLevel *= 1.2;
+            updateZoom();
+        }
+
+        function zoomOut() {
+            zoomLevel /= 1.2;
+            updateZoom();
+        }
+
+        function resetZoom() {
+            zoomLevel = 1;
+            updateZoom();
+        }
+
+        function updateZoom() {
+            const canvas = document.getElementById('blueprintCanvas');
+            canvas.style.transform = `scale(${zoomLevel})`;
+        }
+
+        // Initialize building types on page load
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                const response = await fetch('/api/building-types');
+                const data = await response.json();
+                
+                const select = document.getElementById('buildingType');
+                select.innerHTML = '<option value="">Select building type...</option>';
+                
+                data.building_types.forEach(type => {
+                    const option = document.createElement('option');
+                    option.value = type;
+                    option.textContent = type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    select.appendChild(option);
+                });
+
+                // Update version info
+                document.getElementById('versionInfo').textContent = 'Blueprint Generator v2.0.0';
+            } catch (error) {
+                showMessage('Failed to load building types', 'error');
+            }
+        });
+    </script>
+</body>
+</html>
