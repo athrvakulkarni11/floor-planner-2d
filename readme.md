@@ -22,8 +22,8 @@ An AI-powered architectural blueprint generation system that creates and optimiz
 
 1. Clone the repository:
 ```sh
-git clone <repository-url>
-cd floorplanner
+git clone https://github.com/athrvakulkarni11/floor-planner-2d.git
+
 ```
 
 2. Install dependencies:
@@ -91,11 +91,3 @@ python main.py
 - Requests
 - Python-multipart
 - Aiofiles
-
-## License
-
-[Add your license information here]
-
-## Contributing
-
-[Add contribution guidelines here]
