@@ -16,7 +16,7 @@ An AI-powered architectural blueprint generation system that creates and optimiz
   - Office buildings
   - Hospitals
   - Schools
-  - And more...
+  - And more....
 
 ## Installation
 
